@@ -1,0 +1,40 @@
+{
+    "manifest_version": 3,
+    "name": "X Color Coded Posts",
+    "version": "1.0.0",
+    "description": "Color codes X.com posts based on their age",
+    "permissions": [
+        "activeTab",
+        "storage"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "https://x.com/*",
+                "https://www.x.com/*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "styles.css"
+            ],
+            "run_at": "document_end"
+        }
+    ],
+    "action": {
+        "default_popup": "dist/src/popup.html",
+        "default_title": "X Color Coded Posts Settings"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "dist/*.js",
+                "dist/*.css"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ]
+}
