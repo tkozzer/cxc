@@ -1,13 +1,15 @@
 {
     "name": "chrono-x-chroma",
-    "version": "2.0.0",
+    "version": "1.0.0",
     "type": "module",
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "build:extension": "./scripts/build.sh",
+        "package": "./scripts/build.sh"
     },
-    "dependencies": {
+    "devDependencies": {
         "@tailwindcss/vite": "^4.1.11",
         "@vitejs/plugin-vue": "^6.0.0",
         "tailwindcss": "^4.1.11",
