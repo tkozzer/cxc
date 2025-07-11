@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Chrono X Chroma",
     "version": "1.0.1",
-    "description": "Enhance X.com browsing with color-coded posts based on age - green for new, red for old posts. Includes customizable modes and legend.",
+    "description": "Enhance X.com browsing with color-coded posts based on age. Includes customizable modes and legend.",
     "icons": {
         "16": "icons/icon-16.png",
         "48": "icons/icon-48.png",
