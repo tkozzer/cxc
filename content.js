@@ -13,16 +13,51 @@
 
     // Extension settings
     let settings = {
-        enableColorCoding: true,
-        borderOnly: false,
+        colorMode: 'both', // 'both', 'border', 'overlay', 'off'
         showLegend: true,
         removeCss: false
     };
 
+    // Migrate old settings format to new format
+    function migrateOldSettings(items) {
+        let colorMode = 'both'; // default
+
+        // Convert old enableColorCoding + borderOnly to new colorMode
+        if (items.enableColorCoding === false) {
+            colorMode = 'off';
+        } else if (items.borderOnly === true) {
+            colorMode = 'border';
+        } else if (items.enableColorCoding === true && items.borderOnly === false) {
+            colorMode = 'both';
+        }
+
+        return {
+            colorMode,
+            showLegend: items.showLegend !== undefined ? items.showLegend : true,
+            removeCss: items.removeCss !== undefined ? items.removeCss : false
+        };
+    }
+
     // Load settings from storage
     if (typeof chrome !== 'undefined' && chrome.storage) {
-        chrome.storage.sync.get(settings, function (items) {
-            settings = items;
+        chrome.storage.sync.get(null, function (items) {
+            console.log('Content script loaded settings:', items);
+
+            // Check if we have the new colorMode setting or need to migrate
+            if (items.colorMode !== undefined) {
+                // New format
+                settings.colorMode = items.colorMode;
+                settings.showLegend = items.showLegend !== undefined ? items.showLegend : true;
+                settings.removeCss = items.removeCss !== undefined ? items.removeCss : false;
+            } else {
+                // Migrate from old format
+                settings = migrateOldSettings(items);
+
+                // Save migrated settings
+                chrome.storage.sync.set(settings);
+            }
+
+            console.log('Content script using settings:', settings);
             applySettings();
         });
     }
@@ -54,7 +89,7 @@
         }
 
         // Check if color coding is enabled
-        if (!settings.enableColorCoding || settings.removeCss) {
+        if (settings.colorMode === 'off' || settings.removeCss) {
             return;
         }
 
@@ -73,11 +108,24 @@
         const ageCategory = getPostAgeCategory(datetime);
         const colors = COLOR_SCHEME[ageCategory];
 
-        // Apply the styling - background only if not in border-only mode
-        if (!settings.borderOnly) {
+        // Clear any existing styles first
+        postElement.style.backgroundColor = '';
+        postElement.style.border = '';
+
+        // Apply styling based on colorMode
+        if (settings.colorMode === 'both') {
+            // Both border and background
+            postElement.style.backgroundColor = colors.bg;
+            postElement.style.border = colors.border;
+        } else if (settings.colorMode === 'border') {
+            // Border only
+            postElement.style.border = colors.border;
+        } else if (settings.colorMode === 'overlay') {
+            // Background only
             postElement.style.backgroundColor = colors.bg;
         }
-        postElement.style.border = colors.border;
+
+        // Always apply these styles regardless of mode (unless off)
         postElement.style.borderRadius = '8px';
         postElement.style.transition = 'all 0.3s ease';
 
@@ -115,52 +163,8 @@
         legendPopup.id = 'chrono-x-chroma-legend-popup';
         legendPopup.style.display = 'none';
 
-        // Update legend content based on border-only mode
-        const legendContent = settings.borderOnly ? `
-            <div class="legend-item">
-                <div class="legend-color" style="border: 2px solid #00ff00;"></div>
-                <span>Very Recent (&lt; 5 min)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="border: 2px solid #ffff00;"></div>
-                <span>Recent (5 min - 1 hour)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="border: 2px solid #ffa500;"></div>
-                <span>Moderate (1 - 6 hours)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="border: 2px solid #ff0000;"></div>
-                <span>Old (6 - 24 hours)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="border: 2px solid #800080;"></div>
-                <span>Very Old (&gt; 1 day)</span>
-            </div>
-        ` : `
-            <div class="legend-item">
-                <div class="legend-color" style="background: rgba(0, 255, 0, 0.3); border: 2px solid #00ff00;"></div>
-                <span>Very Recent (&lt; 5 min)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: rgba(255, 255, 0, 0.3); border: 2px solid #ffff00;"></div>
-                <span>Recent (5 min - 1 hour)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: rgba(255, 165, 0, 0.3); border: 2px solid #ffa500;"></div>
-                <span>Moderate (1 - 6 hours)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: rgba(255, 0, 0, 0.3); border: 2px solid #ff0000;"></div>
-                <span>Old (6 - 24 hours)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: rgba(128, 0, 128, 0.3); border: 2px solid #800080;"></div>
-                <span>Very Old (&gt; 1 day)</span>
-            </div>
-        `;
-
-        legendPopup.innerHTML = legendContent;
+        // Update legend content based on colorMode
+        updateLegendContent();
 
         document.body.appendChild(legend);
         document.body.appendChild(legendPopup);
@@ -185,49 +189,79 @@
         const legendPopup = document.getElementById('chrono-x-chroma-legend-popup');
         if (!legendPopup) return;
 
-        const legendContent = settings.borderOnly ? `
-            <div class="legend-item">
-                <div class="legend-color" style="border: 2px solid #00ff00;"></div>
-                <span>Very Recent (&lt; 5 min)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="border: 2px solid #ffff00;"></div>
-                <span>Recent (5 min - 1 hour)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="border: 2px solid #ffa500;"></div>
-                <span>Moderate (1 - 6 hours)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="border: 2px solid #ff0000;"></div>
-                <span>Old (6 - 24 hours)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="border: 2px solid #800080;"></div>
-                <span>Very Old (&gt; 1 day)</span>
-            </div>
-        ` : `
-            <div class="legend-item">
-                <div class="legend-color" style="background: rgba(0, 255, 0, 0.3); border: 2px solid #00ff00;"></div>
-                <span>Very Recent (&lt; 5 min)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: rgba(255, 255, 0, 0.3); border: 2px solid #ffff00;"></div>
-                <span>Recent (5 min - 1 hour)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: rgba(255, 165, 0, 0.3); border: 2px solid #ffa500;"></div>
-                <span>Moderate (1 - 6 hours)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: rgba(255, 0, 0, 0.3); border: 2px solid #ff0000;"></div>
-                <span>Old (6 - 24 hours)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: rgba(128, 0, 128, 0.3); border: 2px solid #800080;"></div>
-                <span>Very Old (&gt; 1 day)</span>
-            </div>
-        `;
+        let legendContent = '';
+
+        if (settings.colorMode === 'border') {
+            legendContent = `
+                <div class="legend-item">
+                    <div class="legend-color" style="border: 2px solid #00ff00;"></div>
+                    <span>Very Recent (&lt; 5 min)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="border: 2px solid #ffff00;"></div>
+                    <span>Recent (5 min - 1 hour)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="border: 2px solid #ffa500;"></div>
+                    <span>Moderate (1 - 6 hours)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="border: 2px solid #ff0000;"></div>
+                    <span>Old (6 - 24 hours)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="border: 2px solid #800080;"></div>
+                    <span>Very Old (&gt; 1 day)</span>
+                </div>
+            `;
+        } else if (settings.colorMode === 'overlay') {
+            legendContent = `
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(0, 255, 0, 0.3);"></div>
+                    <span>Very Recent (&lt; 5 min)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(255, 255, 0, 0.3);"></div>
+                    <span>Recent (5 min - 1 hour)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(255, 165, 0, 0.3);"></div>
+                    <span>Moderate (1 - 6 hours)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(255, 0, 0, 0.3);"></div>
+                    <span>Old (6 - 24 hours)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(128, 0, 128, 0.3);"></div>
+                    <span>Very Old (&gt; 1 day)</span>
+                </div>
+            `;
+        } else {
+            // Both mode or default
+            legendContent = `
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(0, 255, 0, 0.3); border: 2px solid #00ff00;"></div>
+                    <span>Very Recent (&lt; 5 min)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(255, 255, 0, 0.3); border: 2px solid #ffff00;"></div>
+                    <span>Recent (5 min - 1 hour)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(255, 165, 0, 0.3); border: 2px solid #ffa500;"></div>
+                    <span>Moderate (1 - 6 hours)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(255, 0, 0, 0.3); border: 2px solid #ff0000;"></div>
+                    <span>Old (6 - 24 hours)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(128, 0, 128, 0.3); border: 2px solid #800080;"></div>
+                    <span>Very Old (&gt; 1 day)</span>
+                </div>
+            `;
+        }
 
         legendPopup.innerHTML = legendContent;
     }
@@ -266,8 +300,9 @@
         });
     }
 
-    // Function to reapply styling to all posts (used when borderOnly setting changes)
+    // Function to reapply styling to all posts (used when colorMode setting changes)
     function reapplyAllStyling() {
+        // First, remove all existing styling and markers
         const posts = document.querySelectorAll('[data-testid="tweet"].chrono-x-chroma');
         posts.forEach(post => {
             // Remove the processed class so it gets reprocessed
@@ -279,8 +314,11 @@
             post.style.borderRadius = '';
             post.style.transition = '';
         });
-        // Reprocess all posts
-        processAllPosts();
+
+        // Small delay to ensure DOM is updated, then reprocess
+        setTimeout(() => {
+            processAllPosts();
+        }, 10);
     }
 
     // Function to hide/show legend
@@ -304,8 +342,8 @@
             toggleLegend(false);
         } else {
             // Apply color coding if enabled
-            if (settings.enableColorCoding) {
-                // If borderOnly setting changed, reapply all styling
+            if (settings.colorMode !== 'off') {
+                // Reapply all styling with new mode
                 reapplyAllStyling();
             } else {
                 removeAllStyling();
@@ -328,6 +366,7 @@
     if (typeof chrome !== 'undefined' && chrome.runtime) {
         chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             if (request.action === 'updateSettings') {
+                console.log('Content script received new settings:', request.settings);
                 settings = request.settings;
                 applySettings();
                 sendResponse({ success: true });

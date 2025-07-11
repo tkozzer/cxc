@@ -3,6 +3,11 @@
     "name": "Chrono X Chroma",
     "version": "1.0.0",
     "description": "Color codes X.com posts based on their age with chronological styling",
+    "icons": {
+        "16": "icons/icon-16.png",
+        "48": "icons/icon-48.png",
+        "128": "icons/icon-128.png"
+    },
     "permissions": [
         "activeTab",
         "storage"
