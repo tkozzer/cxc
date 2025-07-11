@@ -35,7 +35,7 @@
         </div>
       </div>
 
-      <!-- Main Content -->
+      <!-- Main Content or Reset Skeleton -->
       <div v-else 
         key="content"
         class="p-5"
@@ -56,27 +56,142 @@
                 'cursor-pointer p-1 rounded transition-colors',
                 currentTheme === 'dark' 
                   ? 'hover:bg-neutral-700' 
-                  : 'hover:bg-neutral-200'
+                  : 'hover:bg-neutral-200',
+                isResetting ? 'opacity-50 pointer-events-none' : ''
               ]"
               @click="toggleTheme"
               :title="currentTheme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'"
             >
-              <span class="text-lg block leading-none">
-                {{ currentTheme === 'light' ? '🌙' : '☀️' }}
-              </span>
+              <MoonIcon v-if="currentTheme === 'light'" class="w-5 h-5" />
+              <SunIcon v-else class="w-5 h-5" />
             </div>
           </div>
         </div>
 
-        <!-- Settings Card with Scrolling -->
+        <!-- Settings Card with Scrolling or Skeleton -->
         <div :class="[
           'rounded-lg shadow-sm border overflow-hidden',
           currentTheme === 'dark' 
             ? 'bg-neutral-800 border-neutral-700' 
             : 'bg-white border-neutral-200'
         ]">
-          <!-- Scrollable Content with Max Height -->
-          <div :class="[
+          <!-- Reset Skeleton State -->
+          <div v-if="isResetting" :class="[
+            'max-h-96 overflow-y-auto',
+            currentTheme === 'dark' ? 'scrollbar-dark' : 'scrollbar-light'
+          ]">
+            <!-- Skeleton for Color Mode Setting -->
+            <div class="p-4">
+              <div :class="[
+                'setting-label',
+                currentTheme === 'dark' ? 'text-white' : 'text-black'
+              ]">
+                <div :class="[
+                  'h-5 rounded animate-pulse',
+                  currentTheme === 'dark' ? 'bg-neutral-600' : 'bg-neutral-300'
+                ]" style="width: 80px;"></div>
+              </div>
+              <div :class="[
+                'setting-description',
+                currentTheme === 'dark' ? 'text-neutral-400' : 'text-neutral-600'
+              ]">
+                <div :class="[
+                  'h-3 rounded animate-pulse',
+                  currentTheme === 'dark' ? 'bg-neutral-700' : 'bg-neutral-200'
+                ]" style="width: 100%;"></div>
+              </div>
+              <div class="mt-3">
+                <!-- Skeleton for ColorModeToggle - matches the exact component structure -->
+                <div class="flex bg-neutral-100 dark:bg-neutral-700 rounded-lg p-1 relative">
+                  <div :class="[
+                    'w-16 h-8 rounded animate-pulse',
+                    currentTheme === 'dark' ? 'bg-neutral-600' : 'bg-neutral-300'
+                  ]"></div>
+                  <div :class="[
+                    'w-16 h-8 rounded animate-pulse ml-1',
+                    currentTheme === 'dark' ? 'bg-neutral-600' : 'bg-neutral-300'
+                  ]"></div>
+                  <div :class="[
+                    'w-16 h-8 rounded animate-pulse ml-1',
+                    currentTheme === 'dark' ? 'bg-neutral-600' : 'bg-neutral-300'
+                  ]"></div>
+                  <div :class="[
+                    'w-12 h-8 rounded animate-pulse ml-1',
+                    currentTheme === 'dark' ? 'bg-neutral-600' : 'bg-neutral-300'
+                  ]"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Skeleton Divider -->
+            <div :class="[
+              'border-t',
+              currentTheme === 'dark' ? 'border-neutral-700' : 'border-neutral-200'
+            ]"></div>
+
+            <!-- Skeleton for Show Legend Setting -->
+            <div class="p-4">
+              <div :class="[
+                'setting-label',
+                currentTheme === 'dark' ? 'text-white' : 'text-black'
+              ]">
+                <div :class="[
+                  'h-5 rounded animate-pulse',
+                  currentTheme === 'dark' ? 'bg-neutral-600' : 'bg-neutral-300'
+                ]" style="width: 90px;"></div>
+                <!-- Skeleton for ToggleSwitch - matches exact dimensions -->
+                <div :class="[
+                  'w-12 h-6 rounded-full animate-pulse',
+                  currentTheme === 'dark' ? 'bg-neutral-600' : 'bg-neutral-300'
+                ]"></div>
+              </div>
+              <div :class="[
+                'setting-description',
+                currentTheme === 'dark' ? 'text-neutral-400' : 'text-neutral-600'
+              ]">
+                <div :class="[
+                  'h-3 rounded animate-pulse',
+                  currentTheme === 'dark' ? 'bg-neutral-700' : 'bg-neutral-200'
+                ]" style="width: 100%;"></div>
+              </div>
+            </div>
+
+            <!-- Skeleton Divider -->
+            <div :class="[
+              'border-t',
+              currentTheme === 'dark' ? 'border-neutral-700' : 'border-neutral-200'
+            ]"></div>
+
+            <!-- Skeleton for Remove CSS Setting -->
+            <div class="p-4">
+              <div :class="[
+                'setting-label',
+                currentTheme === 'dark' ? 'text-white' : 'text-black'
+              ]">
+                <div :class="[
+                  'h-5 rounded animate-pulse',
+                  currentTheme === 'dark' ? 'bg-neutral-600' : 'bg-neutral-300'
+                ]" style="width: 160px;"></div>
+                <!-- Skeleton for ToggleSwitch - matches exact dimensions -->
+                <div :class="[
+                  'w-12 h-6 rounded-full animate-pulse',
+                  currentTheme === 'dark' ? 'bg-neutral-600' : 'bg-neutral-300'
+                ]"></div>
+              </div>
+              <div :class="[
+                'setting-description',
+                currentTheme === 'dark' ? 'text-neutral-400' : 'text-neutral-600'
+              ]">
+                <div :class="[
+                  'h-3 rounded animate-pulse',
+                  currentTheme === 'dark' ? 'bg-neutral-700' : 'bg-neutral-200'
+                ]" style="width: 100%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actual Content -->
+          <div v-else :class="[
             'max-h-96 overflow-y-auto',
             currentTheme === 'dark' ? 'scrollbar-dark' : 'scrollbar-light'
           ]">
@@ -163,13 +278,18 @@
         <button 
           :class="[
             'w-full px-4 py-2 rounded transition-colors text-sm mt-3',
-            currentTheme === 'dark' 
-              ? 'bg-red-700 hover:bg-red-800 text-white' 
-              : 'bg-red-600 hover:bg-red-700 text-white'
+            isResetting 
+              ? (currentTheme === 'dark' 
+                ? 'bg-neutral-700 text-neutral-400 cursor-not-allowed' 
+                : 'bg-neutral-300 text-neutral-500 cursor-not-allowed')
+              : (currentTheme === 'dark' 
+                ? 'bg-red-700 hover:bg-red-800 text-white' 
+                : 'bg-red-600 hover:bg-red-700 text-white')
           ]"
           @click="resetSettings"
+          :disabled="isResetting"
         >
-          Reset to Defaults
+          {{ isResetting ? 'Resetting...' : 'Reset to Defaults' }}
         </button>
       </div>
     </Transition>
@@ -180,6 +300,8 @@
 import { ref, onMounted, computed } from 'vue'
 import ToggleSwitch from './ToggleSwitch.vue'
 import ColorModeToggle from './ColorModeToggle.vue'
+import MoonIcon from './icons/MoonIcon.vue'
+import SunIcon from './icons/SunIcon.vue'
 
 // Reactive state
 const settings = ref({
@@ -190,6 +312,7 @@ const settings = ref({
 
 const currentTheme = ref('light')
 const isLoading = ref(true)
+const isResetting = ref(false)
 
 // Computed style for smooth container transitions
 const containerStyle = computed(() => {
@@ -316,7 +439,9 @@ const toggleTheme = () => {
 
 // Reset settings
 const resetSettings = () => {
-  isLoading.value = true
+  if (isResetting.value) return
+  
+  isResetting.value = true
   settings.value = { ...defaultSettings }
   currentTheme.value = getSystemTheme()
   
@@ -337,10 +462,16 @@ const resetSettings = () => {
             } else {
               console.log('Reset settings sent to content script successfully')
             }
-            isLoading.value = false
+            
+            // Add a minimum delay for better UX
+            setTimeout(() => {
+              isResetting.value = false
+            }, 800)
           })
         } else {
-          isLoading.value = false
+          setTimeout(() => {
+            isResetting.value = false
+          }, 800)
         }
       })
     })
