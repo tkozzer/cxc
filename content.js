@@ -1,4 +1,4 @@
-// X Color Coded Posts - Content Script
+// Chrono X Chroma - Content Script
 (function () {
     'use strict';
 
@@ -49,7 +49,7 @@
     // Function to apply color coding to a post
     function colorCodePost(postElement) {
         // Skip if already processed
-        if (postElement.classList.contains('x-color-coded')) {
+        if (postElement.classList.contains('chrono-x-chroma')) {
             return;
         }
 
@@ -82,7 +82,7 @@
         postElement.style.transition = 'all 0.3s ease';
 
         // Mark as processed
-        postElement.classList.add('x-color-coded');
+        postElement.classList.add('chrono-x-chroma');
         postElement.setAttribute('data-post-age', ageCategory.toLowerCase());
     }
 
@@ -97,7 +97,7 @@
     // Function to create and show the legend
     function createLegend() {
         // Check if legend already exists
-        if (document.getElementById('x-color-coded-legend')) {
+        if (document.getElementById('chrono-x-chroma-legend')) {
             return;
         }
 
@@ -107,12 +107,12 @@
         }
 
         const legend = document.createElement('div');
-        legend.id = 'x-color-coded-legend';
+        legend.id = 'chrono-x-chroma-legend';
         legend.innerHTML = '+';
 
         // Create the legend popup
         const legendPopup = document.createElement('div');
-        legendPopup.id = 'x-color-coded-legend-popup';
+        legendPopup.id = 'chrono-x-chroma-legend-popup';
         legendPopup.style.display = 'none';
 
         // Update legend content based on border-only mode
@@ -182,7 +182,7 @@
 
     // Function to update legend content based on current settings
     function updateLegendContent() {
-        const legendPopup = document.getElementById('x-color-coded-legend-popup');
+        const legendPopup = document.getElementById('chrono-x-chroma-legend-popup');
         if (!legendPopup) return;
 
         const legendContent = settings.borderOnly ? `
@@ -255,23 +255,23 @@
 
     // Function to remove all styling from posts
     function removeAllStyling() {
-        const posts = document.querySelectorAll('[data-testid="tweet"].x-color-coded');
+        const posts = document.querySelectorAll('[data-testid="tweet"].chrono-x-chroma');
         posts.forEach(post => {
             post.style.backgroundColor = '';
             post.style.border = '';
             post.style.borderRadius = '';
             post.style.transition = '';
-            post.classList.remove('x-color-coded');
+            post.classList.remove('chrono-x-chroma');
             post.removeAttribute('data-post-age');
         });
     }
 
     // Function to reapply styling to all posts (used when borderOnly setting changes)
     function reapplyAllStyling() {
-        const posts = document.querySelectorAll('[data-testid="tweet"].x-color-coded');
+        const posts = document.querySelectorAll('[data-testid="tweet"].chrono-x-chroma');
         posts.forEach(post => {
             // Remove the processed class so it gets reprocessed
-            post.classList.remove('x-color-coded');
+            post.classList.remove('chrono-x-chroma');
             post.removeAttribute('data-post-age');
             // Clear existing styles
             post.style.backgroundColor = '';
@@ -285,8 +285,8 @@
 
     // Function to hide/show legend
     function toggleLegend(show) {
-        const legend = document.getElementById('x-color-coded-legend');
-        const legendPopup = document.getElementById('x-color-coded-legend-popup');
+        const legend = document.getElementById('chrono-x-chroma-legend');
+        const legendPopup = document.getElementById('chrono-x-chroma-legend-popup');
 
         if (legend) {
             legend.style.display = show ? 'flex' : 'none';
@@ -315,7 +315,7 @@
             toggleLegend(settings.showLegend);
 
             // Create legend if it doesn't exist and should be shown
-            if (settings.showLegend && !document.getElementById('x-color-coded-legend')) {
+            if (settings.showLegend && !document.getElementById('chrono-x-chroma-legend')) {
                 createLegend();
             } else if (settings.showLegend) {
                 // Update existing legend content
@@ -349,7 +349,7 @@
             subtree: true
         });
 
-        console.log('X Color Coded Posts extension loaded');
+        console.log('Chrono X Chroma extension loaded');
     }
 
     // Wait for the page to be ready

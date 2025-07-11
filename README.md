@@ -1,4 +1,4 @@
-# X Color Coded Posts - Chrome Extension
+# Chrono X Chroma - Chrome Extension
 
 A Chrome extension that color-codes posts on X.com (formerly Twitter) based on their age, making it easy to see how recent each post is at a glance.
 

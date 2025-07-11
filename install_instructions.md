@@ -47,7 +47,7 @@ If you have a pre-built version without source code:
 
 1. **Download the Extension**
    - Download all the files to your computer
-   - Keep them together in a single folder (e.g., `x-color-coded-extension`)
+   - Keep them together in a single folder (e.g., `chrono-x-chroma`)
 
 2. **Load in Chrome**
    - Follow steps 4-7 from the Development Setup above
@@ -119,13 +119,13 @@ The extension will work without icons, but if you want custom icons:
 ### Console Errors
 - Press F12 to open Developer Tools
 - Check the Console tab for any error messages
-- Look for messages starting with "X Color Coded Posts"
+- Look for messages starting with "Chrono X Chroma"
 - For Vue-related errors, check both the extension popup console and the page console
 
 ## Uninstalling
 
 1. Go to `chrome://extensions/`
-2. Find "X Color Coded Posts" in the list
+2. Find "Chrono X Chroma" in the list
 3. Click "Remove" button
 4. Confirm removal
 
@@ -134,7 +134,7 @@ The extension will work without icons, but if you want custom icons:
 ### Development Version
 Your extension folder should contain:
 ```
-x-color-coded-extension/
+chrono-x-chroma/
 ├── manifest.json              # Extension configuration
 ├── content.js                 # Content script for X.com
 ├── styles.css                 # Content script styles
@@ -162,7 +162,7 @@ x-color-coded-extension/
 
 ### Pre-built Version
 ```
-x-color-coded-extension/
+chrono-x-chroma/
 ├── manifest.json
 ├── content.js
 ├── styles.css

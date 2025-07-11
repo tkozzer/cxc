@@ -1,7 +1,7 @@
-/* X Color Coded Posts - Styles */
+/* Chrono X Chroma - Styles */
 
 /* Legend styling */
-#x-color-coded-legend {
+#chrono-x-chroma-legend {
     position: fixed;
     top: 10px;
     left: 10px;
@@ -26,7 +26,7 @@
 }
 
 /* Legend popup styling */
-#x-color-coded-legend-popup {
+#chrono-x-chroma-legend-popup {
     position: fixed;
     top: 50px;
     left: 10px;
@@ -67,7 +67,7 @@
 
 /* Responsive legend for smaller screens */
 @media (max-width: 768px) {
-    #x-color-coded-legend {
+    #chrono-x-chroma-legend {
         top: 5px;
         left: 5px;
         width: 28px;
@@ -75,7 +75,7 @@
         font-size: 14px;
     }
 
-    #x-color-coded-legend-popup {
+    #chrono-x-chroma-legend-popup {
         top: 38px;
         left: 5px;
         right: 10px;
@@ -96,6 +96,6 @@
 
 
 /* Ensure posts don't interfere with existing layout */
-[data-testid="tweet"].x-color-coded {
+[data-testid="tweet"].chrono-x-chroma {
     box-sizing: border-box;
 }

@@ -11,7 +11,7 @@
         <!-- Title Section -->
         <div class="flex-1 text-center">
           <h1 class="text-blue-500 font-bold text-base">
-            X Color Coded Posts Settings
+            Chrono X Chroma Settings
           </h1>
         </div>
         
