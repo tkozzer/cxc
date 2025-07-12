@@ -296,7 +296,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue'
 import ToggleSwitch from './ToggleSwitch.vue'
 import ColorModeToggle from './ColorModeToggle.vue'
@@ -342,7 +342,7 @@ const getSystemTheme = () => {
 }
 
 // Migrate old settings format to new format
-const migrateOldSettings = (items) => {
+const migrateOldSettings = (items: any) => {
   let colorMode = 'both' // default
   
   // Convert old enableColorCoding + borderOnly to new colorMode
@@ -413,11 +413,11 @@ const saveSettings = () => {
     
     // Send message to content script with error handling
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0] && (tabs[0].url.includes('x.com') || tabs[0].url.includes('twitter.com'))) {
+      if (tabs[0] && tabs[0].id !== undefined && (tabs[0].url?.includes('x.com') || tabs[0].url?.includes('twitter.com'))) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: 'updateSettings',
           settings: settingsToSave
-        }, (response) => {
+        }, () => {
           // Handle response or error
           if (chrome.runtime.lastError) {
             console.log('Content script not available:', chrome.runtime.lastError.message)
@@ -448,14 +448,14 @@ const resetSettings = () => {
   chrome.storage.sync.clear(() => {
     chrome.storage.sync.set(defaultSettings, () => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs[0] && (tabs[0].url.includes('x.com') || tabs[0].url.includes('twitter.com'))) {
+        if (tabs[0] && tabs[0].id !== undefined && (tabs[0].url?.includes('x.com') || tabs[0].url?.includes('twitter.com'))) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: 'updateSettings',
             settings: {
               ...defaultSettings,
               theme: currentTheme.value
             }
-          }, (response) => {
+          }, () => {
             // Handle response or error
             if (chrome.runtime.lastError) {
               console.log('Content script not available:', chrome.runtime.lastError.message)

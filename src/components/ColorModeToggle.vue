@@ -18,7 +18,7 @@
       
       <!-- Option buttons -->
       <button
-        v-for="(option, index) in options"
+        v-for="option in options"
         :key="option.value"
         @click="selectOption(option.value)"
         :class="[
@@ -54,7 +54,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { defineProps, defineEmits, computed } from 'vue'
 
 const props = defineProps({
@@ -93,7 +93,7 @@ const options = [
   }
 ]
 
-const previewColors = [
+const previewColors: PreviewColor[] = [
   { name: 'green', title: 'Very Recent (< 5 min)' },
   { name: 'yellow', title: 'Recent (5 min - 1 hour)' },
   { name: 'orange', title: 'Moderate (1 - 6 hours)' },
@@ -114,13 +114,18 @@ const sliderStyle = computed(() => {
   }
 })
 
-const selectOption = (value) => {
+const selectOption = (value: string) => {
   emit('update:modelValue', value)
   emit('change', value)
 }
 
-const getPreviewStyle = (color) => {
-  const borderColors = {
+interface PreviewColor {
+  name: 'green' | 'yellow' | 'orange' | 'red' | 'purple';
+  title: string;
+}
+
+const getPreviewStyle = (color: PreviewColor) => {
+  const borderColors: Record<PreviewColor['name'], string> = {
     green: 'border-green-500',
     yellow: 'border-yellow-500', 
     orange: 'border-orange-500',
@@ -128,7 +133,7 @@ const getPreviewStyle = (color) => {
     purple: 'border-purple-500'
   }
   
-  const backgroundColors = {
+  const backgroundColors: Record<PreviewColor['name'], string> = {
     green: 'bg-green-500/30',
     yellow: 'bg-yellow-500/30',
     orange: 'bg-orange-500/30', 

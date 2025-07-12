@@ -1,9 +1,9 @@
 // Chrono X Chroma - Content Script
-(function () {
+(function (): void {
     'use strict';
 
     // Color scheme for different post ages
-    const COLOR_SCHEME = {
+    const COLOR_SCHEME: Record<string, { bg: string; border: string }> = {
         VERY_RECENT: { bg: 'rgba(0, 255, 0, 0.1)', border: '2px solid #00ff00' }, // Green - under 5 minutes
         RECENT: { bg: 'rgba(255, 255, 0, 0.1)', border: '2px solid #ffff00' },     // Yellow - 5 minutes to 1 hour
         MODERATE: { bg: 'rgba(255, 165, 0, 0.1)', border: '2px solid #ffa500' },   // Orange - 1 hour to 6 hours
@@ -12,15 +12,19 @@
     };
 
     // Extension settings
-    let settings = {
+    let settings: {
+        colorMode: 'both' | 'border' | 'overlay' | 'off';
+        showLegend: boolean;
+        removeCss: boolean;
+    } = {
         colorMode: 'both', // 'both', 'border', 'overlay', 'off'
         showLegend: true,
         removeCss: false
     };
 
     // Migrate old settings format to new format
-    function migrateOldSettings(items) {
-        let colorMode = 'both'; // default
+    function migrateOldSettings(items: any): typeof settings {
+        let colorMode: 'both' | 'border' | 'overlay' | 'off' = 'both'; // default
 
         // Convert old enableColorCoding + borderOnly to new colorMode
         if (items.enableColorCoding === false) {
@@ -40,7 +44,7 @@
 
     // Load settings from storage
     if (typeof chrome !== 'undefined' && chrome.storage) {
-        chrome.storage.sync.get(null, function (items) {
+        chrome.storage.sync.get(null, function (items: any): void {
             console.log('Content script loaded settings:', items);
 
             // Check if we have the new colorMode setting or need to migrate
@@ -63,10 +67,10 @@
     }
 
     // Function to calculate post age category
-    function getPostAgeCategory(datetime) {
+    function getPostAgeCategory(datetime: string): string {
         const now = new Date();
         const postTime = new Date(datetime);
-        const diffInMinutes = (now - postTime) / (1000 * 60);
+        const diffInMinutes = (now.getTime() - postTime.getTime()) / (1000 * 60);
 
         if (diffInMinutes < 5) {
             return 'VERY_RECENT';
@@ -82,7 +86,7 @@
     }
 
     // Function to apply color coding to a post
-    function colorCodePost(postElement) {
+    function colorCodePost(postElement: Element): void {
         // Skip if already processed
         if (postElement.classList.contains('chrono-x-chroma')) {
             return;
@@ -94,7 +98,7 @@
         }
 
         // Find the time element with datetime attribute
-        const timeElement = postElement.querySelector('time[datetime]');
+        const timeElement = postElement.querySelector('time[datetime]') as HTMLTimeElement;
         if (!timeElement) {
             return;
         }
@@ -109,25 +113,25 @@
         const colors = COLOR_SCHEME[ageCategory];
 
         // Clear any existing styles first
-        postElement.style.backgroundColor = '';
-        postElement.style.border = '';
+        (postElement as HTMLElement).style.backgroundColor = '';
+        (postElement as HTMLElement).style.border = '';
 
         // Apply styling based on colorMode
         if (settings.colorMode === 'both') {
             // Both border and background
-            postElement.style.backgroundColor = colors.bg;
-            postElement.style.border = colors.border;
+            (postElement as HTMLElement).style.backgroundColor = colors.bg;
+            (postElement as HTMLElement).style.border = colors.border;
         } else if (settings.colorMode === 'border') {
             // Border only
-            postElement.style.border = colors.border;
+            (postElement as HTMLElement).style.border = colors.border;
         } else if (settings.colorMode === 'overlay') {
             // Background only
-            postElement.style.backgroundColor = colors.bg;
+            (postElement as HTMLElement).style.backgroundColor = colors.bg;
         }
 
         // Always apply these styles regardless of mode (unless off)
-        postElement.style.borderRadius = '8px';
-        postElement.style.transition = 'all 0.3s ease';
+        (postElement as HTMLElement).style.borderRadius = '8px';
+        (postElement as HTMLElement).style.transition = 'all 0.3s ease';
 
         // Mark as processed
         postElement.classList.add('chrono-x-chroma');
@@ -135,7 +139,7 @@
     }
 
     // Function to process all posts on the page
-    function processAllPosts() {
+    function processAllPosts(): void {
         const posts = document.querySelectorAll('[data-testid="tweet"]');
         posts.forEach(post => {
             colorCodePost(post);
@@ -143,7 +147,7 @@
     }
 
     // Function to create and show the legend
-    function createLegend() {
+    function createLegend(): void {
         // Check if legend already exists
         if (document.getElementById('chrono-x-chroma-legend')) {
             return;
@@ -171,12 +175,13 @@
 
         // Add toggle functionality
         let isExpanded = false;
-        legend.addEventListener('click', function () {
+        legend.addEventListener('click', function (): void {
             if (isExpanded) {
                 legendPopup.style.display = 'none';
                 legend.innerHTML = '+';
                 isExpanded = false;
             } else {
+                updateLegendContent(); // Ensure content is always set when opening
                 legendPopup.style.display = 'block';
                 legend.innerHTML = '−';
                 isExpanded = true;
@@ -185,7 +190,7 @@
     }
 
     // Function to update legend content based on current settings
-    function updateLegendContent() {
+    function updateLegendContent(): void {
         const legendPopup = document.getElementById('chrono-x-chroma-legend-popup');
         if (!legendPopup) return;
 
@@ -266,141 +271,127 @@
         legendPopup.innerHTML = legendContent;
     }
 
-    // Observer to watch for new posts being added (for infinite scroll)
-    const observer = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-            if (mutation.type === 'childList') {
-                mutation.addedNodes.forEach(function (node) {
-                    if (node.nodeType === 1) { // Element node
-                        // Check if the added node is a post or contains posts
-                        if (node.matches && node.matches('[data-testid="tweet"]')) {
-                            colorCodePost(node);
-                        } else if (node.querySelectorAll) {
-                            const posts = node.querySelectorAll('[data-testid="tweet"]');
-                            posts.forEach(post => {
-                                colorCodePost(post);
-                            });
-                        }
-                    }
-                });
-            }
-        });
-    });
-
     // Function to remove all styling from posts
-    function removeAllStyling() {
-        const posts = document.querySelectorAll('[data-testid="tweet"].chrono-x-chroma');
+    function removeAllStyling(): void {
+        const posts = document.querySelectorAll('[data-testid="tweet"]');
         posts.forEach(post => {
-            post.style.backgroundColor = '';
-            post.style.border = '';
-            post.style.borderRadius = '';
-            post.style.transition = '';
+            (post as HTMLElement).style.backgroundColor = '';
+            (post as HTMLElement).style.border = '';
+            (post as HTMLElement).style.borderRadius = '';
+            (post as HTMLElement).style.transition = '';
             post.classList.remove('chrono-x-chroma');
             post.removeAttribute('data-post-age');
         });
     }
 
-    // Function to reapply styling to all posts (used when colorMode setting changes)
-    function reapplyAllStyling() {
-        // First, remove all existing styling and markers
-        const posts = document.querySelectorAll('[data-testid="tweet"].chrono-x-chroma');
-        posts.forEach(post => {
-            // Remove the processed class so it gets reprocessed
-            post.classList.remove('chrono-x-chroma');
-            post.removeAttribute('data-post-age');
-            // Clear existing styles
-            post.style.backgroundColor = '';
-            post.style.border = '';
-            post.style.borderRadius = '';
-            post.style.transition = '';
-        });
+    // Function to reapply all styling
+    // function reapplyAllStyling(): void {
+    //     // Remove all existing styling first
+    //     removeAllStyling();
+    //
+    //     // Reapply styling to all posts
+    //     processAllPosts();
+    //
+    //     // Update legend
+    //     updateLegendContent();
+    // }
 
-        // Small delay to ensure DOM is updated, then reprocess
-        setTimeout(() => {
-            processAllPosts();
-        }, 10);
-    }
-
-    // Function to hide/show legend
-    function toggleLegend(show) {
+    // Function to toggle legend visibility
+    function toggleLegend(show: boolean): void {
         const legend = document.getElementById('chrono-x-chroma-legend');
         const legendPopup = document.getElementById('chrono-x-chroma-legend-popup');
 
         if (legend) {
-            legend.style.display = show ? 'flex' : 'none';
+            legend.style.display = show ? 'block' : 'none';
         }
         if (legendPopup) {
-            legendPopup.style.display = 'none'; // Always hide popup when toggling
+            legendPopup.style.display = 'none';
         }
     }
 
     // Function to apply current settings
-    function applySettings() {
+    function applySettings(): void {
         if (settings.removeCss) {
-            // Remove all styling
+            // Remove all styling and legend
             removeAllStyling();
-            toggleLegend(false);
+            const legend = document.getElementById('chrono-x-chroma-legend');
+            const legendPopup = document.getElementById('chrono-x-chroma-legend-popup');
+            if (legend) legend.remove();
+            if (legendPopup) legendPopup.remove();
+            return;
+        }
+
+        // Remove existing styling to allow reprocessing
+        removeAllStyling();
+
+        // Apply color coding to all posts
+        processAllPosts();
+
+        // Handle legend
+        if (settings.showLegend) {
+            createLegend();
+            toggleLegend(true);
         } else {
-            // Apply color coding if enabled
-            if (settings.colorMode !== 'off') {
-                // Reapply all styling with new mode
-                reapplyAllStyling();
-            } else {
-                removeAllStyling();
-            }
-
-            // Show/hide legend
-            toggleLegend(settings.showLegend);
-
-            // Create legend if it doesn't exist and should be shown
-            if (settings.showLegend && !document.getElementById('chrono-x-chroma-legend')) {
-                createLegend();
-            } else if (settings.showLegend) {
-                // Update existing legend content
-                updateLegendContent();
-            }
+            toggleLegend(false);
         }
     }
 
-    // Listen for messages from popup
-    if (typeof chrome !== 'undefined' && chrome.runtime) {
-        chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-            if (request.action === 'updateSettings') {
-                console.log('Content script received new settings:', request.settings);
-                settings = request.settings;
-                applySettings();
-                sendResponse({ success: true });
+    // Function to initialize the extension
+    function init(): void {
+        console.log('Chrono X Chroma content script initialized');
+
+        // Apply initial styling
+        applySettings();
+
+        // Set up mutation observer to handle dynamic content
+        const observer = new MutationObserver((mutations) => {
+            let shouldReprocess = false;
+
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            const element = node as Element;
+                            if (element.querySelector && element.querySelector('[data-testid="tweet"]')) {
+                                shouldReprocess = true;
+                            }
+                        }
+                    });
+                }
+            });
+
+            if (shouldReprocess) {
+                setTimeout(() => {
+                    processAllPosts();
+                    if (settings.showLegend && !document.getElementById('chrono-x-chroma-legend')) {
+                        createLegend();
+                    }
+                }, 100);
             }
         });
-    }
 
-    // Function to initialize the extension
-    function init() {
-        // Process existing posts
-        processAllPosts();
-
-        // Create legend
-        createLegend();
-
-        // Start observing for new posts
+        // Start observing
         observer.observe(document.body, {
             childList: true,
             subtree: true
         });
 
-        console.log('Chrono X Chroma extension loaded');
+        // Listen for messages from popup
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+            chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+                if (message.action === 'updateSettings') {
+                    settings = { ...settings, ...message.settings };
+                    applySettings();
+                    sendResponse({ success: true });
+                }
+            });
+        }
     }
 
-    // Wait for the page to be ready
+    // Initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
         init();
     }
-
-    // Also run after a short delay to catch any posts that load after initial page load
-    setTimeout(function () {
-        processAllPosts();
-    }, 2000);
-
 })(); 

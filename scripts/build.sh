@@ -3,22 +3,27 @@
 # Chrono X Chroma - Build Script
 # Creates a minimal extension package for distribution
 
+set -e
+
 echo "🚀 Building Chrono X Chroma Extension..."
 
 # Create build directory
 rm -rf build
 mkdir -p build
 
+# Compile TypeScript content script directly to build directory
+echo "🔧 Compiling TypeScript content script..."
+tsc content.ts --outDir build --module ESNext --target ES2020 --esModuleInterop false --allowJs false --noEmit false --declaration false
+
 # Build the Vite project
 echo "📦 Building Vite project..."
-npm run build
+pnpm run build
 
 # Copy essential extension files to build directory
 echo "📂 Copying extension files..."
 
 # Core extension files
 cp manifest.json build/
-cp content.js build/
 cp styles.css build/
 
 # Icons
@@ -35,6 +40,12 @@ echo "🧹 Cleaning up build..."
 
 # Remove development files from build
 rm -rf build/dist/src/style.css.map 2>/dev/null || true
+
+# Clean up any content.js file in root directory (from previous builds)
+rm -f content.js
+
+# Clean up any old JavaScript files that should be TypeScript
+rm -f src/popup.js
 
 # Create extension package
 echo "📦 Creating extension package..."

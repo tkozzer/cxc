@@ -5,6 +5,6 @@
   </svg>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 // No props needed for this simple icon
 </script> 

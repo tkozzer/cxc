@@ -10,10 +10,12 @@
   </label>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { defineProps, defineEmits } from 'vue'
 
-const props = defineProps({
+// Restore defineProps for prop typing, but do not assign to unused variable
+
+defineProps({
   modelValue: {
     type: Boolean,
     default: false
@@ -26,8 +28,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
-const handleChange = (event) => {
-  const value = event.target.checked
+const handleChange = (event: Event) => {
+  const value = (event.target as HTMLInputElement).checked
   emit('update:modelValue', value)
   emit('change', value)
 }
