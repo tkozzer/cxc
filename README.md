@@ -1,6 +1,6 @@
 # Chrono X Chroma - Chrome Extension
 
-A Chrome extension that color-codes posts on X.com (formerly Twitter) based on their age, making it easy to see how recent each post is at a glance. Features a modern Vue 3 settings interface with dark mode support and customizable color options.
+A Chrome extension that color-codes posts on X.com (formerly Twitter) based on their age, making it easy to see how recent each post is at a glance. Features a modern Vue 3 settings interface with dark mode support and customizable color options. Built with TypeScript for enhanced type safety and developer experience.
 
 ## Features
 
@@ -108,11 +108,13 @@ The extension uses several sophisticated mechanisms:
 ```
 chrono-x-chroma/
 ├── manifest.json              # Extension configuration
-├── content.js                 # Main content script logic
+├── content.ts                 # TypeScript content script
 ├── styles.css                 # Legend and styling
+├── tsconfig.json              # TypeScript configuration
+├── vite.config.ts             # Vite + TypeScript config
 ├── src/                       # Vue 3 popup source
 │   ├── popup.html             # Popup HTML template
-│   ├── popup.js               # Vue app entry point
+│   ├── popup.ts               # TypeScript Vue app entry
 │   ├── style.css              # Tailwind CSS imports
 │   └── components/
 │       ├── PopupApp.vue       # Main settings interface
@@ -132,6 +134,23 @@ chrono-x-chroma/
 2. Run `npm run build` to rebuild
 3. Reload extension in `chrome://extensions/`
 4. Test changes on X.com
+
+### TypeScript Development
+This project uses TypeScript for type safety. Available type checking commands:
+
+```bash
+# Type check all TypeScript files
+npm run typecheck
+
+# Type check in watch mode (for development)
+npm run typecheck:watch
+```
+
+**TypeScript Files:**
+- `content.ts` - Content script with Chrome extension types
+- `src/popup.ts` - Vue app entry point
+- `src/components/*.vue` - Vue components with TypeScript
+- `vite.config.ts` - Vite configuration
 
 ### Popup Development
 For UI development, you can use Vite's dev server:
